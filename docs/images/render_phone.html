@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Screenshot Renderer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0d0f1a; --card: #1a1e35; --card2: #1f2442;
+      --accent: #6c63ff; --accent2: #a78bfa; --green: #22d3a5;
+      --orange: #f97316; --pink: #f472b6; --blue: #38bdf8;
+      --text: #e2e8f0; --muted: #64748b;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+    body { background: #0b0d18; color: var(--text); padding: 40px; display: flex; justify-content: center; align-items: center; }
+
+    /* Phone */
+    .phone {
+      width: 380px; background: #000; border-radius: 44px; padding: 12px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.1);
+      position: relative;
+    }
+    .phone-screen {
+      background: var(--bg); border-radius: 34px; overflow: hidden;
+      display: flex; flex-direction: column; min-height: 700px;
+    }
+    .phone-notch {
+      width: 120px; height: 24px; background: #000; border-radius: 0 0 16px 16px;
+      margin: 0 auto; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 10;
+    }
+    .phone-appbar {
+      background: #1e1b4b; padding: 36px 20px 16px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .phone-appbar h3 { font-size: 18px; font-weight: 700; color: #fff; }
+    .phone-balance {
+      background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+      margin: 16px; padding: 20px; border-radius: 20px; border: 1px solid rgba(108,99,255,0.3);
+    }
+    .lbl { font-size: 11px; letter-spacing: 1px; color: var(--accent2); font-weight: 600; }
+    .amount { font-size: 28px; font-weight: 800; color: #fff; margin: 4px 0 12px; }
+    .pb-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; border-top: 1px solid rgba(255,255,255,0.1); pt: 12px; padding-top: 12px; }
+    .val { font-size: 12px; font-weight: 700; color: #fff; }
+    .lbl2 { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+    .phone-section-title { font-size: 12px; font-weight: 700; color: var(--muted); padding: 8px 16px 4px; letter-spacing: 0.5px; }
+    .phone-expense-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.01);
+    }
+    .pci { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .cat-food { background: rgba(249,115,22,0.15); }
+    .cat-transport { background: rgba(56,189,248,0.15); }
+    .cat-shopping { background: rgba(244,114,182,0.15); }
+    .cat-utilities { background: rgba(34,211,165,0.15); }
+    .pen { font-size: 13px; font-weight: 600; color: #f1f5f9; }
+    .ped { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .pea { margin-left: auto; font-size: 14px; font-weight: 700; }
+    .phone-bottom-nav {
+      margin-top: auto; background: #13162a; border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; padding: 8px 0 14px;
+    }
+    .phone-nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--muted); }
+    .phone-nav-item.active { color: var(--accent2); font-weight: 600; }
+    .phone-nav-item .icon { font-size: 18px; margin-bottom: 2px; }
+    .phone-fab {
+      position: absolute; bottom: 65px; right: 28px; width: 50px; height: 50px; border-radius: 25px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6); display: flex; align-items: center;
+      justify-content: center; font-size: 22px; box-shadow: 0 8px 20px rgba(108,99,255,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="phone-notch"></div>
+    <div class="phone-screen">
+      <div class="phone-appbar">
+        <h3>💸 VKU Expense</h3>
+        <span style="font-size:12px;color:var(--accent2);background:rgba(108,99,255,0.2);padding:4px 8px;border-radius:12px;">Tháng 10/2026</span>
+      </div>
+      <div class="phone-balance">
+        <div class="lbl">TỔNG CHI TIÊU</div>
+        <div class="amount">3,420,000 đ</div>
+        <div class="pb-row">
+          <div><div class="val">1,540,000đ</div><div class="lbl2">🍜 Ăn uống</div></div>
+          <div><div class="val">680,000đ</div><div class="lbl2">🚗 Di chuyển</div></div>
+          <div><div class="val">1,200,000đ</div><div class="lbl2">🛍️ Mua sắm</div></div>
+        </div>
+      </div>
+      <div class="phone-section-title">HÓA ĐƠN GẦN ĐÂY</div>
+      <div class="phone-expense-item">
+        <div class="pci cat-food">🍜</div>
+        <div><div class="pen">Phở Bò Thương Hạng</div><div class="ped">12/10/2026 · Quét OCR</div></div>
+        <div class="pea" style="color:var(--orange)">-85,000đ</div>
+      </div>
+      <div class="phone-expense-item">
+        <div class="pci cat-transport">🚗</div>
+        <div><div class="pen">Grab Bike · Sơn Trà</div><div class="ped">11/10/2026 · Quét OCR</div></div>
+        <div class="pea" style="color:var(--blue)">-45,000đ</div>
+      </div>
+      <div class="phone-expense-item">
+        <div class="pci cat-shopping">🛍️</div>
+        <div><div class="pen">Circle K Hoàng Diệu</div><div class="ped">10/10/2026 · Quét OCR</div></div>
+        <div class="pea" style="color:var(--pink)">-127,000đ</div>
+      </div>
+      <div class="phone-expense-item">
+        <div class="pci cat-utilities">💡</div>
+        <div><div class="pen">Điện EVN Miền Trung</div><div class="ped">09/10/2026 · Thủ công</div></div>
+        <div class="pea" style="color:var(--green)">-650,000đ</div>
+      </div>
+      <div class="phone-expense-item">
+        <div class="pci cat-food">🧋</div>
+        <div><div class="pen">Highlands Coffee</div><div class="ped">08/10/2026 · Quét OCR</div></div>
+        <div class="pea" style="color:var(--orange)">-75,000đ</div>
+      </div>
+      <div class="phone-bottom-nav">
+        <div class="phone-nav-item active"><div class="icon">🏠</div>Trang chủ</div>
+        <div class="phone-nav-item"><div class="icon">📊</div>Báo cáo</div>
+        <div class="phone-nav-item"><div class="icon">⚙️</div>Cài đặt</div>
+      </div>
+    </div>
+    <div class="phone-fab">📷</div>
+  </div>
+</body>
+</html>
