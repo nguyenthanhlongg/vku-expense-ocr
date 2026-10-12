@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VKU Expense OCR – Quản Lý Chi Tiêu Thông Minh</title>
+  <meta name="description" content="Ứng dụng quản lý chi tiêu thông minh tích hợp OCR nhận diện hóa đơn tự động. Mini-project Week 7 – VKU.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0d0f1a;--bg2: #13162a;--card: #1a1e35;--card2: #1f2442;
+      --border: rgba(255,255,255,0.07);--accent: #6c63ff;--accent2: #a78bfa;
+      --green: #22d3a5;--orange: #f97316;--pink: #f472b6;--blue: #38bdf8;
+      --red: #f87171;--text: #e2e8f0;--muted: #64748b;--radius: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--card2); border-radius: 4px; }
+
+    .hero {
+      background: linear-gradient(135deg, #0d0f1a 0%, #1a0533 50%, #0d1a33 100%);
+      padding: 80px 24px 60px; text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(108,99,255,0.15) 0%, transparent 60%),
+                  radial-gradient(circle at 70% 30%, rgba(167,139,250,0.1) 0%, transparent 50%);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3);
+      padding: 6px 16px; border-radius: 999px; font-size: 13px; color: var(--accent2);
+      margin-bottom: 24px; position: relative;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .hero h1 {
+      font-size: clamp(32px, 6vw, 56px); font-weight: 800; line-height: 1.15;
+      background: linear-gradient(135deg, #fff 0%, var(--accent2) 60%, var(--blue) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 16px; position: relative;
+    }
+    .hero p { font-size: 16px; color: var(--muted); max-width: 520px; margin: 0 auto 36px; line-height: 1.7; position: relative; }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #8b5cf6); color: white; border: none;
+      padding: 13px 28px; border-radius: 12px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108,99,255,0.55); }
+    .btn-secondary {
+      background: var(--card); color: var(--text); border: 1px solid var(--border);
+      padding: 13px 28px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+    }
+    .btn-secondary:hover { background: var(--card2); }
+    .tech-strip { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
+    .tech-tag {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--muted);
+    }
+    .features-strip {
+      display: flex; justify-content: center; background: var(--card);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .feature-pill {
+      display: flex; align-items: center; gap: 8px; padding: 14px 24px;
+      font-size: 13px; color: var(--muted); border-right: 1px solid var(--border);
+    }
+    .feature-pill:last-child { border-right: none; }
+    .app-shell { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media(max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr 1fr; } }
+    @media(max-width: 480px) { .grid-3 { grid-template-columns: 1fr; } }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; transition: transform 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+    .stat-value { font-size: 26px; font-weight: 800; }
+    .stat-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .stat-green .stat-value { color: var(--green); }
+    .stat-orange .stat-value { color: var(--orange); }
+    .stat-purple .stat-value { color: var(--accent2); }
+
+    /* Phone */
+    .phone-container { display: flex; justify-content: center; align-items: center; padding: 20px 0; }
+    .phone {
+      width: 300px; height: 620px; background: var(--bg2); border-radius: 40px;
+      border: 6px solid #2a2d4a; overflow: hidden; position: relative;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    }
+    .phone-notch { width: 100px; height: 26px; background: #2a2d4a; border-radius: 0 0 20px 20px; margin: 0 auto; }
+    .phone-screen { padding: 0 0 80px; height: 100%; overflow-y: auto; }
+    .phone-screen::-webkit-scrollbar { display: none; }
+    .phone-appbar { background: linear-gradient(135deg, #1a0533, #0d1a33); padding: 16px; text-align: center; }
+    .phone-appbar h3 { font-size: 14px; font-weight: 700; color: white; }
+    .phone-appbar p { font-size: 10px; color: rgba(255,255,255,0.5); }
+    .phone-balance { margin: 12px; background: linear-gradient(135deg, #6c63ff, #8b5cf6); border-radius: 16px; padding: 16px; }
+    .phone-balance .lbl { font-size: 10px; color: rgba(255,255,255,0.7); }
+    .phone-balance .amount { font-size: 22px; font-weight: 800; color: white; margin: 4px 0; }
+    .phone-balance .sub { font-size: 10px; color: rgba(255,255,255,0.6); }
+    .pb-row { display: flex; gap: 8px; margin-top: 10px; }
+    .pb-item { flex: 1; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 8px; text-align: center; }
+    .pb-item .val { font-size: 12px; font-weight: 700; color: white; }
+    .pb-item .lbl2 { font-size: 9px; color: rgba(255,255,255,0.6); }
+    .phone-section-title { padding: 12px 12px 4px; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; text-transform: uppercase; }
+    .phone-expense-item {
+      display: flex; align-items: center; gap: 10px; margin: 4px 12px;
+      background: rgba(255,255,255,0.04); border-radius: 12px; padding: 10px 12px; cursor: pointer; transition: background 0.2s;
+    }
+    .phone-expense-item:hover { background: rgba(255,255,255,0.08); }
+    .pci { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .pen { font-size: 12px; font-weight: 600; color: white; }
+    .ped { font-size: 10px; color: rgba(255,255,255,0.4); }
+    .pea { font-size: 12px; font-weight: 700; margin-left: auto; }
+    .phone-bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: #1a1e35; border-top: 1px solid rgba(255,255,255,0.07); display: flex; padding: 8px 0 4px; }
+    .phone-nav-item { flex: 1; text-align: center; cursor: pointer; padding: 4px; }
+    .nav-icon { font-size: 20px; }
+    .nav-label { font-size: 9px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .phone-nav-item.active .nav-label { color: var(--accent); }
+    .phone-fab {
+      position: absolute; bottom: 56px; right: 16px; width: 48px; height: 48px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6); display: flex; align-items: center;
+      justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 20px rgba(108,99,255,0.5);
+      transition: transform 0.2s;
+    }
+    .phone-fab:hover { transform: scale(1.08); }
+    .cat-food { background: rgba(249,115,22,0.15); }
+    .cat-transport { background: rgba(56,189,248,0.15); }
+    .cat-shopping { background: rgba(244,114,182,0.15); }
+    .cat-utilities { background: rgba(34,211,165,0.15); }
+    .cat-other { background: rgba(167,139,250,0.15); }
+
+    /* Charts */
+    .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .chart-title { font-size: 16px; font-weight: 700; }
+    .chart-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .chart-legend { display: flex; gap: 12px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* OCR */
+    .ocr-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-top: 20px; }
+    .ocr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    @media(max-width: 600px) { .ocr-grid { grid-template-columns: 1fr; } }
+    .upload-zone {
+      border: 2px dashed rgba(108,99,255,0.4); border-radius: 12px; padding: 24px;
+      text-align: center; cursor: pointer; transition: all 0.3s; background: rgba(108,99,255,0.04); position: relative; overflow: hidden;
+    }
+    .upload-zone:hover { border-color: var(--accent); background: rgba(108,99,255,0.08); }
+    .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .receipt-preview { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); display: none; position: relative; margin-top: 12px; }
+    .receipt-preview img { width: 100%; display: block; }
+    .scan-btn {
+      width: 100%; margin-top: 14px; background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      color: white; border: none; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .scan-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .scanning-overlay {
+      background: rgba(0,0,0,0.75); position: absolute; inset: 0; display: none;
+      flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    }
+    .scanning-bar { height: 3px; background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent); width: 200px; border-radius: 2px; animation: scan 1.5s ease-in-out infinite; }
+    @keyframes scan { 0%{background-position:0%} 100%{background-position:200%} }
+    .ocr-result { display: none; }
+    .ocr-result.visible { display: block; }
+    .result-field { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+    .result-field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+    .result-field input, .result-field select { width: 100%; background: none; border: none; color: var(--text); font-size: 15px; font-weight: 600; font-family: inherit; outline: none; }
+    .result-field select option { background: var(--card); }
+    .save-btn {
+      width: 100%; margin-top: 12px; background: linear-gradient(135deg, var(--green), #059669);
+      color: white; border: none; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s;
+    }
+    .save-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Table */
+    .expense-table-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .table-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+    .table-title { font-size: 16px; font-weight: 700; }
+    .search-input { background: var(--bg2); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 10px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s; width: 200px; }
+    .search-input:focus { border-color: var(--accent); }
+    .expense-row { display: flex; align-items: center; gap: 14px; padding: 14px 24px; border-bottom: 1px solid var(--border); transition: background 0.2s; cursor: pointer; flex-wrap: wrap; }
+    .expense-row:last-child { border-bottom: none; }
+    .expense-row:hover { background: rgba(255,255,255,0.03); }
+    .cat-badge { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .exp-name { font-size: 14px; font-weight: 600; }
+    .exp-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .exp-cat { font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+    .exp-amount { font-size: 15px; font-weight: 700; min-width: 110px; text-align: right; }
+    .exp-ocr-badge { font-size: 10px; padding: 3px 8px; border-radius: 999px; background: rgba(108,99,255,0.15); color: var(--accent2); border: 1px solid rgba(108,99,255,0.3); font-weight: 600; }
+    .badge-food { background: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3); }
+    .badge-transport { background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
+    .badge-shopping { background: rgba(244,114,182,0.15); color: #f472b6; border: 1px solid rgba(244,114,182,0.3); }
+    .badge-utilities { background: rgba(34,211,165,0.15); color: #22d3a5; border: 1px solid rgba(34,211,165,0.3); }
+    .badge-other { background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
+
+    footer { text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+    footer strong { color: var(--accent2); }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: linear-gradient(135deg, #22d3a5, #059669); color: white; padding: 12px 24px; border-radius: 12px;
+      font-size: 14px; font-weight: 600; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span>Week 7 Mini-Project · VKU · Flutter App Demo</div>
+  <h1>VKU Expense OCR<br>Quản Lý Chi Tiêu Thông Minh</h1>
+  <p>Ứng dụng tự động nhận diện hóa đơn bằng AI, phân loại chi tiêu theo danh mục và báo cáo thống kê trực quan.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="document.getElementById('ocr-section').scrollIntoView({behavior:'smooth'})">🧪 Thử Demo OCR</button>
+    <button class="btn-secondary" onclick="document.getElementById('expenses').scrollIntoView({behavior:'smooth'})">📊 Xem Báo Cáo</button>
+  </div>
+  <div class="tech-strip">
+    <span class="tech-tag">🎯 Flutter</span>
+    <span class="tech-tag">🤖 ML Kit OCR</span>
+    <span class="tech-tag">🗄️ SQLite</span>
+    <span class="tech-tag">⚡ Riverpod</span>
+    <span class="tech-tag">🗺️ GoRouter</span>
+    <span class="tech-tag">📱 Material 3</span>
+  </div>
+</section>
+
+<div class="features-strip">
+  <div class="feature-pill">📸 Chụp hóa đơn tức thì</div>
+  <div class="feature-pill">🤖 OCR tự động nhận diện</div>
+  <div class="feature-pill">📂 Phân loại danh mục</div>
+  <div class="feature-pill">📊 Báo cáo thống kê</div>
+  <div class="feature-pill">💾 Lưu trữ offline</div>
+</div>
+
+<div class="app-shell">
+  <div class="section-title">TỔNG QUAN THÁNG NÀY</div>
+  <div class="grid-3" style="margin-bottom:24px">
+    <div class="stat-card stat-orange">
+      <div class="stat-label">Tổng chi tiêu</div>
+      <div class="stat-value" id="total-amount">3,420,000 đ</div>
+      <div class="stat-sub">📈 +12% so tháng trước</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="stat-label">Hóa đơn đã quét</div>
+      <div class="stat-value" id="total-count">7</div>
+      <div class="stat-sub">🤖 6 qua OCR · 1 thủ công</div>
+    </div>
+    <div class="stat-card stat-purple">
+      <div class="stat-label">Danh mục nhiều nhất</div>
+      <div class="stat-value">🍜 Ăn uống</div>
+      <div class="stat-sub">45% tổng chi tiêu</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:24px; align-items:start">
+    <div class="phone-container">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-appbar"><h3>💸 VKU Expense</h3><p>Tháng 10, 2026</p></div>
+          <div class="phone-balance">
+            <div class="lbl">TỔNG CHI TIÊU</div>
+            <div class="amount">3,420,000 đ</div>
+            <div class="sub">Tháng 10/2026 • 7 hóa đơn</div>
+            <div class="pb-row">
+              <div class="pb-item"><div class="val">1,540,000đ</div><div class="lbl2">🍜 Ăn uống</div></div>
+              <div class="pb-item"><div class="val">680,000đ</div><div class="lbl2">🚗 Di chuyển</div></div>
+              <div class="pb-item"><div class="val">1,200,000đ</div><div class="lbl2">🛍️ Mua sắm</div></div>
+            </div>
+          </div>
+          <div class="phone-section-title">GIAO DỊCH GẦN ĐÂY</div>
+          <div class="phone-expense-item" onclick="showToast('🍜 Phở Bò Thương Hạng · 85,000đ')">
+            <div class="pci cat-food">🍜</div>
+            <div><div class="pen">Phở Bò Thương Hạng</div><div class="ped">12/10/2026 · OCR</div></div>
+            <div class="pea" style="color:#f97316">-85,000đ</div>
+          </div>
+          <div class="phone-expense-item" onclick="showToast('🚗 Grab · Đà Nẵng · 45,000đ')">
+            <div class="pci cat-transport">🚗</div>
+            <div><div class="pen">Grab · Đà Nẵng</div><div class="ped">11/10/2026 · OCR</div></div>
+            <div class="pea" style="color:#38bdf8">-45,000đ</div>
+          </div>
+          <div class="phone-expense-item" onclick="showToast('🛍️ Circle K · 127,000đ')">
+            <div class="pci cat-shopping">🛍️</div>
+            <div><div class="pen">Circle K Hoàng Diệu</div><div class="ped">10/10/2026 · OCR</div></div>
+            <div class="pea" style="color:#f472b6">-127,000đ</div>
+          </div>
+          <div class="phone-expense-item" onclick="showToast('💡 Điện EVN · 650,000đ')">
+            <div class="pci cat-utilities">💡</div>
+            <div><div class="pen">Điện EVN Miền Trung</div><div class="ped">09/10/2026 · Thủ công</div></div>
+            <div class="pea" style="color:#22d3a5">-650,000đ</div>
+          </div>
+          <div class="phone-expense-item" onclick="showToast('🧋 Highlands Coffee · 75,000đ')">
+            <div class="pci cat-food">🧋</div>
+            <div><div class="pen">Highlands Coffee</div><div class="ped">08/10/2026 · OCR</div></div>
+            <div class="pea" style="color:#f97316">-75,000đ</div>
+          </div>
+        </div>
+        <div class="phone-fab" onclick="showToast('📷 Trong app: Chụp hoặc chọn ảnh hóa đơn!')">📷</div>
+        <div class="phone-bottom-nav">
+          <div class="phone-nav-item active"><div class="nav-icon">🏠</div><div class="nav-label">Trang chủ</div></div>
+          <div class="phone-nav-item" onclick="showToast('📊 Màn hình báo cáo!')"><div class="nav-icon">📊</div><div class="nav-label">Báo cáo</div></div>
+          <div class="phone-nav-item" onclick="showToast('⚙️ Cài đặt!')"><div class="nav-icon">⚙️</div><div class="nav-label">Cài đặt</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">BIỂU ĐỒ CHI TIÊU</div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div><div class="chart-title">Phân tích theo danh mục</div><div class="chart-sub">Tháng 10/2026</div></div>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#f97316"></span>Ăn uống</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#38bdf8"></span>Di chuyển</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f472b6"></span>Mua sắm</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#22d3a5"></span>Tiện ích</div>
+          </div>
+        </div>
+        <canvas id="pieChart" height="220"></canvas>
+      </div>
+      <div class="chart-card" style="margin-top:16px">
+        <div class="chart-header"><div><div class="chart-title">Chi tiêu theo ngày</div><div class="chart-sub">7 ngày gần nhất</div></div></div>
+        <canvas id="barChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCR DEMO -->
+  <div id="ocr-section" class="ocr-section">
+    <div class="ocr-grid">
+      <div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px">🤖 Demo OCR – Nhận Diện Hóa Đơn</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px">Tải lên ảnh hóa đơn bất kỳ. Trong app thật, chức năng này dùng <strong style="color:var(--accent2)">Google ML Kit</strong> để nhận diện văn bản trực tiếp trên thiết bị (offline).</div>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept="image/*" onchange="handleFile(event)">
+          <div style="font-size:40px;margin-bottom:8px">📄</div>
+          <p><strong style="color:var(--accent2)">Nhấn để tải ảnh hóa đơn</strong><br>hoặc kéo thả vào đây</p>
+          <p style="margin-top:8px;font-size:11px;color:var(--muted)">JPG, PNG, WebP</p>
+        </div>
+        <div class="receipt-preview" id="receipt-preview">
+          <img id="receipt-img" src="" alt="Receipt">
+          <div class="scanning-overlay" id="scanning-overlay">
+            <div style="font-size:32px">🔍</div>
+            <div style="font-size:13px;color:var(--accent2);font-weight:600">Đang nhận diện văn bản...</div>
+            <div class="scanning-bar"></div>
+            <div style="font-size:11px;color:var(--muted)">ML Kit đang phân tích hình ảnh</div>
+          </div>
+        </div>
+        <button class="scan-btn" id="scan-btn" onclick="startScan()" disabled>🔍 Quét OCR</button>
+      </div>
+
+      <div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">📋 Kết Quả Nhận Diện</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Dữ liệu tự động được trích xuất từ hình ảnh</div>
+        <div id="ocr-placeholder" style="text-align:center;padding:40px 20px;color:var(--muted)">
+          <div style="font-size:40px;margin-bottom:12px">🧾</div>
+          <div style="font-size:14px">Chưa có hình ảnh để quét</div>
+          <div style="font-size:12px;margin-top:4px">Tải lên ảnh hóa đơn để bắt đầu</div>
+        </div>
+        <div class="ocr-result" id="ocr-result">
+          <div class="result-field"><label>🏪 Tên cửa hàng / Merchant</label><input type="text" id="r-merchant"></div>
+          <div class="result-field"><label>💰 Số tiền (đồng)</label><input type="text" id="r-amount"></div>
+          <div class="result-field"><label>📅 Ngày giao dịch</label><input type="date" id="r-date"></div>
+          <div class="result-field"><label>📂 Danh mục</label>
+            <select id="r-category">
+              <option value="food">🍜 Ăn uống</option>
+              <option value="transport">🚗 Di chuyển</option>
+              <option value="shopping">🛍️ Mua sắm</option>
+              <option value="utilities">💡 Tiện ích</option>
+              <option value="other">📦 Khác</option>
+            </select>
+          </div>
+          <div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:10px;padding:12px;margin-bottom:10px">
+            <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:4px">📝 RAW OCR TEXT</div>
+            <div id="r-raw" style="font-size:11px;color:var(--muted);line-height:1.6;white-space:pre-line"></div>
+          </div>
+          <button class="save-btn" onclick="saveExpense()">✅ Lưu vào danh sách</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSE TABLE -->
+  <div style="margin-top:24px" id="expenses">
+    <div class="section-title">DANH SÁCH CHI TIÊU</div>
+    <div class="expense-table-section">
+      <div class="table-header">
+        <div class="table-title">Tất cả giao dịch</div>
+        <input class="search-input" type="text" placeholder="🔍 Tìm kiếm..." oninput="filterExpenses(this.value)">
+      </div>
+      <div id="expense-list"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>Được xây dựng bởi <strong>VKU Student</strong> · Week 7 Mini-Project</div>
+  <div style="margin-top:6px">Flutter · Google ML Kit OCR · SQLite · Riverpod · GoRouter</div>
+  <div style="margin-top:12px;font-size:11px;color:rgba(100,116,139,0.6)">Web demo mô phỏng giao diện ứng dụng Flutter thực tế</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const expenses = [
+  {id:'1',merchant:'Phở Bò Thương Hạng',amount:85000,date:'12/10/2026',category:'food',ocr:true},
+  {id:'2',merchant:'Grab · Đà Nẵng',amount:45000,date:'11/10/2026',category:'transport',ocr:true},
+  {id:'3',merchant:'Circle K Hoàng Diệu',amount:127000,date:'10/10/2026',category:'shopping',ocr:true},
+  {id:'4',merchant:'Điện EVN Miền Trung',amount:650000,date:'09/10/2026',category:'utilities',ocr:false},
+  {id:'5',merchant:'Highlands Coffee',amount:75000,date:'08/10/2026',category:'food',ocr:true},
+  {id:'6',merchant:'Bún Chả Cá Bà Dưỡng',amount:55000,date:'07/10/2026',category:'food',ocr:true},
+  {id:'7',merchant:'Shopee · Phụ kiện',amount:389000,date:'06/10/2026',category:'shopping',ocr:false},
+];
+const catIcon={food:'🍜',transport:'🚗',shopping:'🛍️',utilities:'💡',other:'📦'};
+const catLabel={food:'Ăn uống',transport:'Di chuyển',shopping:'Mua sắm',utilities:'Tiện ích',other:'Khác'};
+const catColor={food:'badge-food',transport:'badge-transport',shopping:'badge-shopping',utilities:'badge-utilities',other:'badge-other'};
+const amtColor={food:'#f97316',transport:'#38bdf8',shopping:'#f472b6',utilities:'#22d3a5',other:'#a78bfa'};
+
+function fmt(n){return n.toLocaleString('vi-VN')+' đ';}
+
+function renderExpenses(list){
+  const c=document.getElementById('expense-list');
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Không tìm thấy giao dịch nào</div>';return;}
+  c.innerHTML=list.map(e=>`
+    <div class="expense-row" onclick="showToast('🧾 ${e.merchant} · ${fmt(e.amount)}')">
+      <div class="cat-badge cat-${e.category}">${catIcon[e.category]}</div>
+      <div><div class="exp-name">${e.merchant}</div><div class="exp-date">${e.date}</div></div>
+      ${e.ocr?'<span class="exp-ocr-badge">OCR</span>':''}
+      <span class="exp-cat ${catColor[e.category]}" style="margin-left:auto">${catLabel[e.category]}</span>
+      <div class="exp-amount" style="color:${amtColor[e.category]}">-${fmt(e.amount)}</div>
+    </div>`).join('');
+}
+function filterExpenses(q){
+  renderExpenses(expenses.filter(e=>e.merchant.toLowerCase().includes(q.toLowerCase())||catLabel[e.category].toLowerCase().includes(q.toLowerCase())));
+}
+renderExpenses(expenses);
+
+// Charts
+new Chart(document.getElementById('pieChart').getContext('2d'),{
+  type:'doughnut',
+  data:{labels:['Ăn uống','Di chuyển','Mua sắm','Tiện ích'],
+    datasets:[{data:[215000,45000,516000,650000],backgroundColor:['#f97316','#38bdf8','#f472b6','#22d3a5'],borderWidth:0,hoverOffset:8}]},
+  options:{responsive:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.toLocaleString('vi-VN')} đ`}}}}
+});
+new Chart(document.getElementById('barChart').getContext('2d'),{
+  type:'bar',
+  data:{labels:['06/10','07/10','08/10','09/10','10/10','11/10','12/10'],
+    datasets:[{label:'Chi tiêu',data:[55000,389000,75000,650000,127000,45000,85000],
+      backgroundColor:'rgba(108,99,255,0.5)',borderColor:'#6c63ff',borderWidth:1,borderRadius:6,borderSkipped:false}]},
+  options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y.toLocaleString('vi-VN')} đ`}}},
+    scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11}}},
+      y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11},callback:v=>(v/1000)+'K'}}}}
+});
+
+// OCR
+function handleFile(e){
+  const file=e.target.files[0]; if(!file)return;
+  const url=URL.createObjectURL(file);
+  document.getElementById('receipt-img').src=url;
+  document.getElementById('receipt-preview').style.display='block';
+  document.getElementById('scan-btn').disabled=false;
+  document.getElementById('ocr-result').classList.remove('visible');
+  document.getElementById('ocr-placeholder').style.display='block';
+}
+const zone=document.getElementById('upload-zone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.style.borderColor='#6c63ff';});
+zone.addEventListener('dragleave',()=>{zone.style.borderColor='';});
+zone.addEventListener('drop',e=>{
+  e.preventDefault();zone.style.borderColor='';
+  const file=e.dataTransfer.files[0];if(!file||!file.type.startsWith('image/'))return;
+  handleFile({target:{files:[file]}});
+  const url=URL.createObjectURL(file);
+  document.getElementById('receipt-img').src=url;
+  document.getElementById('receipt-preview').style.display='block';
+  document.getElementById('scan-btn').disabled=false;
+});
+
+function startScan(){
+  const ov=document.getElementById('scanning-overlay');
+  ov.style.display='flex';
+  document.getElementById('scan-btn').disabled=true;
+  setTimeout(()=>{ov.style.display='none';showOcrResult();document.getElementById('scan-btn').disabled=false;},2500);
+}
+function showOcrResult(){
+  document.getElementById('r-merchant').value='Phở Bò Thương Hạng';
+  document.getElementById('r-amount').value='85,000';
+  document.getElementById('r-date').value='2023-10-25';
+  document.getElementById('r-category').value='food';
+  document.getElementById('r-raw').textContent=`PHỞ BÒ THƯƠNG HẠNG\n123 Lê Lợi, Đà Nẵng\nĐT: 0236 3821 456\n\nHOÁ ĐƠN THANH TOÁN\nNgày: 25/10/2023 12:45\nSố: 004567\n\nPhở đặc biệt    1   65.000đ\nNước ngọt       1   20.000đ\n\nTỔNG CỘNG: 85.000đ\n\nCẢM ƠN QUÝ KHÁCH!`;
+  document.getElementById('ocr-placeholder').style.display='none';
+  document.getElementById('ocr-result').classList.add('visible');
+  showToast('✅ OCR hoàn tất! Thông tin đã được trích xuất.');
+}
+function saveExpense(){
+  const merchant=document.getElementById('r-merchant').value;
+  const amount=parseInt(document.getElementById('r-amount').value.replace(/[^0-9]/g,''));
+  const cat=document.getElementById('r-category').value;
+  const d=new Date(); const ds=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  expenses.unshift({id:String(Date.now()),merchant,amount,date:ds,category:cat,ocr:true});
+  renderExpenses(expenses);
+  const total=expenses.reduce((s,e)=>s+e.amount,0);
+  document.getElementById('total-amount').textContent=fmt(total);
+  document.getElementById('total-count').textContent=expenses.length;
+  showToast('💾 Đã lưu: '+merchant+' – '+fmt(amount));
+  document.getElementById('ocr-result').classList.remove('visible');
+  document.getElementById('ocr-placeholder').style.display='block';
+  document.getElementById('receipt-preview').style.display='none';
+  document.getElementById('scan-btn').disabled=true;
+  document.getElementById('expenses').scrollIntoView({behavior:'smooth'});
+}
+
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
