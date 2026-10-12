@@ -2,7 +2,7 @@
 ## ỨNG DỤNG NHẬN DIỆN HÓA ĐƠN THÔNG MINH & QUẢN LÝ CHI TIÊU CÁ NHÂN
 
 > **Học phần:** Lập trình ứng dụng đa nền tảng (Flutter) — Mini-Project Tuần 7  
-> **Sinh viên thực hiện:** Nguyễn Thành Long  
+> **Sinh viên thực hiện:** Nguyễn Thành Long  23IT.B120
 > **Đơn vị:** Trường Đại học Công nghệ Thông tin và Truyền thông Việt - Hàn (VKU)  
 > **Web Demo Trực Tuyến:** [https://nguyenthanhlongg.github.io/vku-expense-ocr/](https://nguyenthanhlongg.github.io/vku-expense-ocr/)  
 > **Mã nguồn GitHub:** [https://github.com/nguyenthanhlongg/vku-expense-ocr](https://github.com/nguyenthanhlongg/vku-expense-ocr)  
